@@ -2,6 +2,11 @@
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <iostream>
+#include <memory>
+#include <vector>
+
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/norm.hpp>
 
 using vec2 = glm::vec2;
 using vec3 = glm::vec3;
@@ -9,8 +14,6 @@ using vec3 = glm::vec3;
 constexpr int imgWidth = 256;
 constexpr float imgRatio = 16.0 / 9.0;
 constexpr float viewportWidth = 2.0f; // in meter
-
-class Primitive {};
 
 class Ray {
 public:
@@ -28,28 +31,62 @@ private:
   vec3 m_dir;
 };
 
-class Sphere : Primitive {
+struct HitRecord {
+  vec3 hitPos;
+  vec3 hitNormal;
+  float t;
+  bool isInside;
+  // TODO: maybe material here
+
+  // adjust the inside and outside normal
+};
+
+class HittableObject {
+public:
+  virtual ~HittableObject() = default;
+  virtual bool isHitBy(const Ray &ray, HitRecord &rec) = 0;
+};
+
+class Sphere : HittableObject {
 public:
   Sphere() = default;
   ~Sphere() = default;
   Sphere(const vec3 &center, double radius)
       : m_center(center), m_radius(radius) {}
 
-  bool isHitBy(const Ray &ray) {
-    float a = glm::dot(ray.direction(), ray.direction());
-    float b = -2 * glm::dot(ray.direction(), m_center - ray.origin());
-    float c = glm::dot(m_center - ray.origin(), m_center - ray.origin()) -
-              m_radius * m_radius;
+  bool isHitBy(const Ray &ray, HitRecord &rec) override {
+    auto a = glm::length2(ray.direction());
+    // h = -2b, optimization
+    auto h = glm::dot(ray.direction(), m_center - ray.origin());
+    auto c = glm::length2(m_center - ray.origin()) - m_radius * m_radius;
 
-    float discriminant = b * b - 4 * a * c;
+    float discriminant = h * h - a * c;
+    // TODO
     if (discriminant < 0)
       return false;
+
+    // find the cloest hit point, i.e. smallest t
+    rec.t = (h - std::sqrt(discriminant)) / a;
+    rec.hitPos = ray.origin() + ray.direction() * rec.t;
+    rec.hitNormal = glm::normalize(rec.hitPos - m_center);
+
     return true;
   }
 
 private:
   vec3 m_center;
   double m_radius;
+};
+
+class Scene {
+public:
+  Scene() = default;
+  ~Scene() = default;
+
+  void add(std::shared_ptr<HittableObject> obj) { m_objs.push_back(obj); }
+
+private:
+  std::vector<std::shared_ptr<HittableObject>> m_objs;
 };
 
 class Viewport {
@@ -123,20 +160,19 @@ public:
     std::clog << "pixel size: " << std::endl;
     vec2 viewportTopleft = cam.eye() - vec3(0.0, 0.0, -cam.focalLength()) -
                            vec3(vp.size() / 2.0f, 0.0);
-    // vec3 eye = vec3(m_width / 2.0f, m_height / 2.0f, 0.0f);
-    Sphere sphere(vec3(0, 0, -1), 0.3f);
+    Sphere sphere(vec3(0, 0, 1), 0.3f);
+    HitRecord hitRec;
 
     std::cout << "P3\n" << m_width << " " << m_height << "\n255\n";
     for (int col = 0; col < m_height; col++) {
       std::clog << "\rReamining lines: " << m_height - col - 1 << std::flush;
       for (int row = 0; row < m_width; row++) {
-        // we assume the viewport is 1 meter away from the camera
         vec3 pixelPos =
             vec3(viewportTopleft + vec2(row, col) * pixelSize, -1.0f);
         Ray ray(cam.eye(), std::move(pixelPos - cam.eye()));
-        if (sphere.isHitBy(ray)) {
-          vec3 color = vec3(1.0, 0.0, 0.0);
-          writeColor(std::cout, vec3(color));
+        if (sphere.isHitBy(ray, hitRec)) {
+          vec3 color = 0.5f * (hitRec.hitNormal + 1.0f);
+          writeColor(std::cout, color);
           continue;
         }
 
