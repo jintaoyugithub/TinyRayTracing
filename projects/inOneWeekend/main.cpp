@@ -10,6 +10,8 @@ constexpr int imgWidth = 256;
 constexpr float imgRatio = 16.0 / 9.0;
 constexpr float viewportWidth = 2.0f; // in meter
 
+class Primitive {};
+
 class Ray {
 public:
   Ray() = default;
@@ -20,12 +22,34 @@ public:
   inline const vec3 direction() const { return m_dir; };
 
   vec3 at(float t) { return m_orig + m_dir * t; }
-  // TODO
-  vec3 hit(vec3 hitPoint) {}
 
 private:
   vec3 m_orig;
   vec3 m_dir;
+};
+
+class Sphere : Primitive {
+public:
+  Sphere() = default;
+  ~Sphere() = default;
+  Sphere(const vec3 &center, double radius)
+      : m_center(center), m_radius(radius) {}
+
+  bool isHitBy(const Ray &ray) {
+    float a = glm::dot(ray.direction(), ray.direction());
+    float b = -2 * glm::dot(ray.direction(), m_center - ray.origin());
+    float c = glm::dot(m_center - ray.origin(), m_center - ray.origin()) -
+              m_radius * m_radius;
+
+    float discriminant = b * b - 4 * a * c;
+    if (discriminant < 0)
+      return false;
+    return true;
+  }
+
+private:
+  vec3 m_center;
+  double m_radius;
 };
 
 class Viewport {
@@ -42,7 +66,8 @@ public:
     m_deltaV = m_height / imgRes.y;
   }
 
-  inline const vec2 getPixelSize() const { return vec2(m_deltaU, m_deltaV); }
+  inline const vec2 pixelSize() const { return vec2(m_deltaU, m_deltaV); }
+  inline const vec2 size() const { return vec2(m_width, m_height); }
 
 private:
   float m_width;
@@ -57,14 +82,17 @@ public:
   Camera() = default;
   ~Camera() = default;
 
-  Camera(const Viewport &viewport, float focalLength)
-      : m_viewport(viewport), m_focalLength(focalLength) {}
+  Camera(const vec3 &eye, float focalLength, const Viewport &viewport)
+      : m_eye(eye), m_viewport(viewport), m_focalLength(focalLength) {}
 
-  const Viewport getViewport() const { return m_viewport; }
+  const Viewport viewport() const { return m_viewport; }
+  const vec3 eye() const { return m_eye; }
+  const float focalLength() const { return m_focalLength; }
 
 private:
-  Viewport m_viewport;
+  vec3 m_eye;
   float m_focalLength;
+  Viewport m_viewport;
 };
 
 class Image {
@@ -90,12 +118,13 @@ public:
   }
 
   void render(Camera cam, bool save = true) {
-    Viewport vp = cam.getViewport();
-    const vec2 pixelSize = vp.getPixelSize();
+    Viewport vp = cam.viewport();
+    const vec2 pixelSize = vp.pixelSize();
     std::clog << "pixel size: " << std::endl;
-    vec2 startPixelPos = vec2(0.0f, 0.0f) + pixelSize / 2.0f;
+    vec2 viewportTopleft = cam.eye() - vec3(0.0, 0.0, -cam.focalLength()) -
+                           vec3(vp.size() / 2.0f, 0.0);
     // vec3 eye = vec3(m_width / 2.0f, m_height / 2.0f, 0.0f);
-    vec3 eye = vec3(0.0f);
+    Sphere sphere(vec3(0, 0, -1), 0.3f);
 
     std::cout << "P3\n" << m_width << " " << m_height << "\n255\n";
     for (int col = 0; col < m_height; col++) {
@@ -103,17 +132,18 @@ public:
       for (int row = 0; row < m_width; row++) {
         // we assume the viewport is 1 meter away from the camera
         vec3 pixelPos =
-            vec3(startPixelPos + vec2(row, col) * vp.getPixelSize(), -1.0f);
-
-        // std::clog << "pixel pos: " << pixelPos.x << " " << pixelPos.y << " "
-        //           << pixelPos.z << std::endl;
-
-        Ray ray(eye, std::move(pixelPos - eye));
+            vec3(viewportTopleft + vec2(row, col) * pixelSize, -1.0f);
+        Ray ray(cam.eye(), std::move(pixelPos - cam.eye()));
+        if (sphere.isHitBy(ray)) {
+          vec3 color = vec3(1.0, 0.0, 0.0);
+          writeColor(std::cout, vec3(color));
+          continue;
+        }
 
         // background color
         auto uintDir = glm::normalize(ray.direction());
         auto a = 0.5f * uintDir.y + 0.5f;
-        vec3 color = glm::mix(vec3(0.0f), vec3(0.5, 0.0, 0.0), a);
+        vec3 color = glm::mix(vec3(0.5f, 0.8, 0.9), vec3(1.0f), a);
         // writeColor(std::cout, vec3(uintDir.y));
         writeColor(std::cout, vec3(color));
       }
@@ -141,6 +171,6 @@ private:
 int main() {
   Image img(imgWidth, imgRatio);
   Viewport vp(viewportWidth, img.ratio(), vec2(img.width(), img.height()));
-  Camera cam(vp, 1);
+  Camera cam(vec3(0.0f), 1.0f, vp);
   img.render(cam);
 }
