@@ -1,0 +1,3 @@
+[submodule "projects/inOneWeekend/thirdparty/glm"]
+	path = projects/inOneWeekend/thirdparty/glm
+	url = https://github.com/g-truc/glm.git
