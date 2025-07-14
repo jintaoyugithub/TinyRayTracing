@@ -12,7 +12,7 @@ int main() {
   Scene scene;
   scene.add(std::make_shared<Sphere>(vec3(0, 0, -1), 0.3f));
   scene.add(std::make_shared<Sphere>(vec3(1.0, 0.5, -1), 0.3f));
-  scene.add(std::make_shared<Sphere>(vec3(-1.0, -0.5, -1), 0.3f));
+  scene.add(std::make_shared<Sphere>(vec3(-1.0, -0.5, -10), 1.0f));
 
   scene.render(cam, img);
 }
