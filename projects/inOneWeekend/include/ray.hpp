@@ -11,7 +11,7 @@ public:
   inline const vec3 origin() const { return m_orig; };
   inline const vec3 direction() const { return m_dir; };
 
-  vec3 at(float t) { return m_orig + m_dir * t; }
+  vec3 at(float t) const { return m_orig + m_dir * t; }
 
 private:
   vec3 m_orig;

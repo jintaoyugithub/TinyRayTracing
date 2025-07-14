@@ -10,7 +10,7 @@ int main() {
   Camera cam(vec3(0.0f), 1.0f, vp);
 
   Scene scene;
-  scene.add(std::make_shared<Sphere>(vec3(0, 0, 1), 0.3f));
+  scene.add(std::make_shared<Sphere>(vec3(0, 0, -1), 0.3f));
   scene.add(std::make_shared<Sphere>(vec3(1.0, 0.5, -1), 0.3f));
   scene.add(std::make_shared<Sphere>(vec3(-1.0, -0.5, -1), 0.3f));
 

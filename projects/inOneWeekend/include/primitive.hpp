@@ -33,13 +33,12 @@ public:
     auto c = glm::length2(m_center - ray.origin()) - m_radius * m_radius;
 
     float discriminant = h * h - a * c;
-    // TODO
     if (discriminant < 0)
       return false;
 
     // find the cloest hit point, i.e. smallest t
     rec.t = (h - std::sqrt(discriminant)) / a; // TODO: could be a problem
-    rec.hitPos = ray.origin() + ray.direction() * rec.t;
+    rec.hitPos = ray.at(rec.t);
     rec.hitNormal = glm::normalize(rec.hitPos - m_center);
     // if the ray direction align with the hit normal
     // the ray is inside the obj

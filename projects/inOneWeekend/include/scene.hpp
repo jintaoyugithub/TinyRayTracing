@@ -13,7 +13,7 @@ public:
   void add(std::shared_ptr<HittableObject> obj) { m_objs.push_back(obj); }
   void render(const Camera &cam, Image &img) {
     Viewport vp = cam.viewport();
-    const vec2 pixelSize = vp.pixelSize();
+    vec2 pixelSize = vp.pixelSize();
     vec2 viewportTopleft = cam.eye() - vec3(0.0, 0.0, -cam.focalLength()) -
                            vec3(vp.size() / 2.0f, 0.0);
     HitRecord cloestHitRec;
@@ -23,8 +23,19 @@ public:
       std::clog << "\rReamining lines: " << img.height() - col - 1
                 << std::flush;
       for (int row = 0; row < img.width(); row++) {
+        // out draw order is from top to bottom
+        //  -------->
+        //  |
+        //  |
+        //  v
+        // but the generated ray is from bottom to top
+        //  ^
+        //  |
+        //  |
+        //  -------->
         vec3 pixelPos =
-            vec3(viewportTopleft + vec2(row, col) * pixelSize, -1.0f);
+            vec3(viewportTopleft + vec2(row, img.height() - col) * pixelSize,
+                 -cam.focalLength());
         Ray ray(cam.eye(), std::move(pixelPos - cam.eye()));
 
         bool hitAnything = false;
@@ -47,7 +58,7 @@ public:
         // background color
         auto uintDir = glm::normalize(ray.direction());
         auto a = 0.5f * uintDir.y + 0.5f;
-        vec3 color = glm::mix(vec3(0.5f, 0.8, 0.9), vec3(1.0f), a);
+        vec3 color = glm::mix(vec3(1.0f), vec3(0.5f, 0.8, 0.9), a);
         // writeColor(std::cout, vec3(uintDir.y));
         img.writeColor(std::cout, vec3(color));
       }
