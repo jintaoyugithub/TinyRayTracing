@@ -44,8 +44,10 @@ public:
         /// for each pixel, get the cloest hit
         for (const auto &obj : m_objs) {
           if (obj->isHitBy(ray, tempRec)) {
-            curCloestHit = tempRec.t;
-            cloestHitRec = tempRec;
+            if (tempRec.t < curCloestHit) {
+              curCloestHit = tempRec.t;
+              cloestHitRec = tempRec;
+            }
             hitAnything = true;
           }
         }
