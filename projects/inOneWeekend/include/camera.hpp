@@ -1,6 +1,8 @@
 #pragma once
 
+#include <image.hpp>
 #include <pch.hpp>
+#include <ray.hpp>
 
 class Viewport {
 public:
@@ -23,8 +25,8 @@ private:
   float m_width;
   float m_height;
   float m_ratio;
-  float m_deltaU;
-  float m_deltaV;
+  double m_deltaU;
+  double m_deltaV;
 };
 
 class Camera {
@@ -38,6 +40,13 @@ public:
   const Viewport viewport() const { return m_viewport; }
   const vec3 eye() const { return m_eye; }
   const float focalLength() const { return m_focalLength; }
+
+public:
+  // necessary?
+  Ray genRay(vec3 pixelPos, vec2 offset) {
+    vec3 realPos = pixelPos + vec3(offset, 0.0f);
+    return Ray(m_eye, std::move(realPos - m_eye));
+  }
 
 private:
   vec3 m_eye;

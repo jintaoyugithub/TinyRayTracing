@@ -26,9 +26,10 @@ public:
   }
 
   void writeColor(std::ostream &out, vec3 color) {
-    int r = int(255.999 * color.r);
-    int g = int(255.999 * color.g);
-    int b = int(255.999 * color.b);
+    vec2 range = vec2(0.0, 0.99);
+    int r = int(256 * clamp(color.r, range.x, range.y));
+    int g = int(256 * clamp(color.g, range.x, range.y));
+    int b = int(256 * clamp(color.b, range.x, range.y));
 
     out << r << " " << g << " " << b << "\n";
   }

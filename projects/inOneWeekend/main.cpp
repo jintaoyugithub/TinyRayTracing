@@ -14,5 +14,5 @@ int main() {
   scene.add(std::make_shared<Sphere>(vec3(1.0, 0.5, -1), 0.3f));
   scene.add(std::make_shared<Sphere>(vec3(0, -3, -3), 3.0f));
 
-  scene.render(cam, img);
+  scene.render(cam, img, 100);
 }

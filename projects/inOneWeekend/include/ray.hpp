@@ -2,6 +2,11 @@
 
 #include <pch.hpp>
 
+enum class SamplingMode {
+  Uniform,
+  Random,
+};
+
 class Ray {
 public:
   Ray() = default;
