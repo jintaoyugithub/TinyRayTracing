@@ -47,8 +47,8 @@ public:
         vec3 pixelColor(0.0f);
         for (int idx = 0; idx < sampLevel; idx++) {
           // randomly generate some offset
-          double xOffset = randDoule(0.0, pixelSize.x / 2.0) * idx;
-          double yOffset = randDoule(0.0, pixelSize.y / 2.0) * idx;
+          double xOffset = randDoule(0.0, pixelSize.x / sampLevel) * idx;
+          double yOffset = randDoule(0.0, pixelSize.y / sampLevel) * idx;
           vec2 pixelOffset = vec2(xOffset, yOffset);
           Ray ray = cam.genRay(pixelPos, pixelOffset);
 
@@ -63,21 +63,14 @@ public:
           }
 
           // accumulate the color no matter if hit something or not
-          pixelColor += 0.5f * (cloestHitRec.hitNormal + 1.0f);
+          pixelColor +=
+              hitAnything
+                  ? 0.5f * (cloestHitRec.hitNormal + 1.0f)
+                  : glm::mix(vec3(1.0f), vec3(0.5f, 0.8, 0.9),
+                             0.5f * glm::normalize(ray.direction()).y + 0.5f);
         }
 
-        if (hitAnything) {
-          img.writeColor(std::cout, pixelColor / vec3(sampLevel));
-          continue;
-        }
-
-        // background color
-        // auto uintDir = glm::normalize(ray.direction());
-        // auto a = 0.5f * uintDir.y + 0.5f;
-        vec3 color = glm::mix(vec3(1.0f), vec3(0.5f, 0.8, 0.9),
-                              (float)col / img.height());
-        // writeColor(std::cout, vec3(uintDir.y));
-        img.writeColor(std::cout, vec3(color));
+        img.writeColor(std::cout, pixelColor / vec3(sampLevel));
       }
     }
 
