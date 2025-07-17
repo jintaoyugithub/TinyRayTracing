@@ -10,7 +10,7 @@ int main() {
   CameraConfig camConfig{};
   camConfig.viewport = vp;
   camConfig.maxRayBounce = 10u;
-  // camConfig.sampLevel = 100u;
+  camConfig.sampLevel = 100u;
   Camera cam(camConfig);
 
   Scene scene;

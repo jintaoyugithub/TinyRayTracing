@@ -102,14 +102,14 @@ public:
       if (glm::dot(randVec, closetRec.hitNormal) < 0.0)
         randVec = -randVec;
       // 0.5 is attenuation
-      return 0.5f * pixelColor(std::move(Ray(closetRec.hitPos, randVec)), scene,
+      return 0.7f * pixelColor(std::move(Ray(closetRec.hitPos, randVec)), scene,
                                bounceCount - 1);
     }
 
     // it not hit anything, return the background color
-    // return glm::mix(vec3(1.0f), vec3(0.5f, 0.8f, 0.9f),
-    //                 0.5f * glm::normalize(ray.direction()).y + 0.5f);
-    return vec3(1.0f);
+    return glm::mix(vec3(1.0f), vec3(0.5f, 0.8f, 0.9f),
+                    0.5f * glm::normalize(ray.direction()).y + 0.5f);
+    // return vec3(1.0f);
   }
 
   void render(const Scene &scene, Image &img) {
