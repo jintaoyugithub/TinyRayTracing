@@ -7,12 +7,16 @@ int main() {
   Image img(imgWidth, imgRatio);
   Viewport vp(viewportWidth, img.ratio(), vec2(img.width(), img.height()));
 
-  Camera cam(vec3(0.0f), 1.0f, vp);
+  CameraConfig camConfig{};
+  camConfig.viewport = vp;
+  camConfig.maxRayBounce = 10u;
+  // camConfig.sampLevel = 100u;
+  Camera cam(camConfig);
 
   Scene scene;
   scene.add(std::make_shared<Sphere>(vec3(0, 0, -1), 0.3f));
   scene.add(std::make_shared<Sphere>(vec3(1.0, 0.5, -1), 0.3f));
-  scene.add(std::make_shared<Sphere>(vec3(0, -3, -3), 3.0f));
+  // scene.add(std::make_shared<Sphere>(vec3(0, -3, -3), 3.0f));
 
-  scene.render(cam, img, 100);
+  cam.render(scene, img);
 }

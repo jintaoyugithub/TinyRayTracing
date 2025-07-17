@@ -1,6 +1,5 @@
 #pragma once
 
-#include <camera.hpp>
 #include <pch.hpp>
 
 class Image {

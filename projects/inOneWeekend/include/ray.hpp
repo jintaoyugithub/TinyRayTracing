@@ -7,6 +7,8 @@ enum class SamplingMode {
   Random,
 };
 
+class HittableObject;
+
 class Ray {
 public:
   Ray() = default;
