@@ -64,19 +64,19 @@ public:
   // recursively invoked
   vec3 pixelColor(const Ray &ray, const Scene &scene,
                   uint16_t bounceCount) const {
-    HitRecord closetRec;
-    HitRecord tempRec;
-    bool hitAnything = false;
-    auto curClosetHit = std::numeric_limits<float>::max();
-
     // achieved the max bounce count
     // if (bounceCount < 0), ERROR: segmentation fault
     if (bounceCount <= 0)
       return vec3(0.0f);
 
+    HitRecord closetRec;
+    HitRecord tempRec;
+    bool hitAnything = false;
+    auto curClosetHit = std::numeric_limits<float>::max();
+
     for (const auto &obj : scene.primitives()) {
       if (obj->isHitBy(ray, tempRec)) {
-        if (tempRec.t < curClosetHit) {
+        if (tempRec.t < curClosetHit && tempRec.t > 0.0f) {
           curClosetHit = tempRec.t;
           closetRec = tempRec;
         }
@@ -84,6 +84,7 @@ public:
       }
     }
 
+    // todo: wrong
     if (hitAnything) {
       // generate a unit bounce ray
       vec3 randVec;
@@ -92,7 +93,7 @@ public:
         // we need to skil the rand vec whose length is greater than 1
         randVec = vec3(randDoule(-1.0, 1.0), randDoule(-1.0, 1.0),
                        randDoule(-1.0, 1.0));
-        if (glm::length(randVec) <= 1) {
+        if (1e-160 < glm::length(randVec) && glm::length(randVec) <= 1) {
           randVec = glm::normalize(randVec);
           break;
         }
@@ -106,8 +107,9 @@ public:
     }
 
     // it not hit anything, return the background color
-    return glm::mix(vec3(1.0f), vec3(0.5f, 0.8f, 0.9f),
-                    0.5f * glm::normalize(ray.direction()).y + 0.5f);
+    // return glm::mix(vec3(1.0f), vec3(0.5f, 0.8f, 0.9f),
+    //                 0.5f * glm::normalize(ray.direction()).y + 0.5f);
+    return vec3(1.0f);
   }
 
   void render(const Scene &scene, Image &img) {
@@ -135,7 +137,7 @@ public:
         vec3 pixelPos =
             vec3(viewportTopleft + vec2(row, img.height() - col) * pixelSize,
                  -m_camConfig.flocalLength);
-        vec3 finalColor{0.0f};
+        vec3 finalColor = vec3(0.0f);
 
         // Multisampling
         for (int idx = 0; idx < sampLevel; idx++) {

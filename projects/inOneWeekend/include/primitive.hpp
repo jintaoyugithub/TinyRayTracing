@@ -37,7 +37,13 @@ public:
       return false;
 
     // find the cloest hit point, i.e. smallest t
-    rec.t = (h - std::sqrt(discriminant)) / a; // TODO: could be a problem
+    auto root = (h - std::sqrt(discriminant)) / a; // TODO: could be a problem
+    if (root < 0.001) {
+      root = (h + std::sqrt(discriminant)) / a;
+      if (root < 0.001)
+        return false;
+    }
+    rec.t = root;
     rec.hitPos = ray.at(rec.t);
     rec.hitNormal = glm::normalize(rec.hitPos - m_center);
     // if the ray direction align with the hit normal
