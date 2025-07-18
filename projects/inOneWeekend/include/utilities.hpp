@@ -16,3 +16,11 @@ inline double clamp(double x, double min, double max) {
     return max;
   return x;
 }
+
+inline double gammaCorrection(double linearValue, float gamma = 0.5f) {
+  if (linearValue > 0.0) {
+    // hardcode gamma = 0.5
+    return std::sqrt(linearValue);
+  }
+  return 0.0;
+}
