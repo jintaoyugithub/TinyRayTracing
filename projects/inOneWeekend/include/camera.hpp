@@ -98,18 +98,18 @@ public:
           break;
         }
       }
-      // flip the vec if it's not in the positive hemi-sphere
-      if (glm::dot(randVec, closetRec.hitNormal) < 0.0)
-        randVec = -randVec;
+
+      // apply lambertian distribution, let reflected ray closer to the normal
+      vec3 dir = closetRec.hitNormal + randVec;
+
       // 0.5 is attenuation
-      return 0.7f * pixelColor(std::move(Ray(closetRec.hitPos, randVec)), scene,
+      return 0.5f * pixelColor(std::move(Ray(closetRec.hitPos, randVec)), scene,
                                bounceCount - 1);
     }
 
     // it not hit anything, return the background color
-    return glm::mix(vec3(1.0f), vec3(0.5f, 0.8f, 0.9f),
+    return glm::mix(vec3(1.0f), vec3(0.5f, 0.7f, 1.0f),
                     0.5f * glm::normalize(ray.direction()).y + 0.5f);
-    // return vec3(1.0f);
   }
 
   void render(const Scene &scene, Image &img) {
