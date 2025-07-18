@@ -3,12 +3,15 @@
 #include <pch.hpp>
 #include <ray.hpp>
 
+class Material;
+
 struct HitRecord {
   vec3 hitPos;
   vec3 hitNormal;
   float t;
   bool isInside;
   // TODO: maybe material here
+  std::shared_ptr<Material> mat;
 
   // adjust the inside and outside normal
 };
@@ -23,8 +26,8 @@ class Sphere : public HittableObject {
 public:
   Sphere() = default;
   ~Sphere() = default;
-  Sphere(const vec3 &center, double radius)
-      : m_center(center), m_radius(radius) {}
+  Sphere(const vec3 &center, double radius, std::shared_ptr<Material> mat)
+      : m_center(center), m_radius(radius), m_mat(mat) {}
 
   bool isHitBy(const Ray &ray, HitRecord &rec) override {
     auto a = glm::length2(ray.direction());
@@ -49,6 +52,7 @@ public:
     // if the ray direction align with the hit normal
     // the ray is inside the obj
     rec.isInside = glm::dot(ray.direction(), rec.hitNormal) < 0 ? false : true;
+    rec.mat = m_mat;
 
     return true;
   }
@@ -56,4 +60,5 @@ public:
 private:
   vec3 m_center;
   double m_radius;
+  std::shared_ptr<Material> m_mat;
 };

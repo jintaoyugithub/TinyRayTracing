@@ -1,8 +1,7 @@
 #pragma once
 
 #include <image.hpp>
-#include <pch.hpp>
-#include <ray.hpp>
+#include <material.hpp>
 #include <scene.hpp>
 
 class Viewport {
@@ -86,25 +85,12 @@ public:
 
     // todo: wrong
     if (hitAnything) {
-      // generate a unit bounce ray
-      vec3 randVec;
-      while (true) {
-        // this rand vec is inside a cube, to get a evenly distribution
-        // we need to skil the rand vec whose length is greater than 1
-        randVec = vec3(randDoule(-1.0, 1.0), randDoule(-1.0, 1.0),
-                       randDoule(-1.0, 1.0));
-        if (1e-160 < glm::length(randVec) && glm::length(randVec) <= 1) {
-          randVec = glm::normalize(randVec);
-          break;
-        }
-      }
-
-      // apply lambertian distribution, let reflected ray closer to the normal
-      vec3 dir = closetRec.hitNormal + randVec;
-
+      Ray scattered;
+      vec3 attenuation;
+      closetRec.mat->scatter(ray, closetRec, scattered, attenuation);
       // 0.5 is attenuation
-      return 0.5f * pixelColor(std::move(Ray(closetRec.hitPos, randVec)), scene,
-                               bounceCount - 1);
+      return attenuation *
+             pixelColor(std::move(scattered), scene, bounceCount - 1);
     }
 
     // it not hit anything, return the background color

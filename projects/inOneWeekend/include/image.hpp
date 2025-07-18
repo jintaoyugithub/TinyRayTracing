@@ -26,6 +26,11 @@ public:
 
   void writeColor(std::ostream &out, vec3 color) {
     vec2 range = vec2(0.0, 0.99);
+
+    color.r = gammaCorrection(color.r);
+    color.g = gammaCorrection(color.g);
+    color.b = gammaCorrection(color.b);
+
     int r = int(256 * clamp(color.r, range.x, range.y));
     int g = int(256 * clamp(color.g, range.x, range.y));
     int b = int(256 * clamp(color.b, range.x, range.y));
