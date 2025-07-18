@@ -3,6 +3,7 @@
 #include <pch.hpp>
 #include <primitive.hpp>
 #include <ray.hpp>
+#include <utilities.hpp>
 
 class Material {
 public:
@@ -22,17 +23,7 @@ public:
   void scatter(const Ray &rayIn, HitRecord &hitRec, Ray &scatteredRay,
                vec3 &attenuation) override {
 
-    vec3 randVec;
-    while (true) {
-      randVec = vec3(randDoule(-1.0, 1.0), randDoule(-1.0, 1.0),
-                     randDoule(-1.0, 1.0));
-      auto vecLen = glm::length(randVec);
-      if (1e-160 < vecLen && vecLen <= 1) {
-        randVec = randVec / vecLen;
-        break;
-      }
-    }
-
+    auto randVec = randUnitVec3();
     vec3 scatterDir = hitRec.hitNormal + randVec;
     scatteredRay = Ray(hitRec.hitPos, scatterDir);
     attenuation = m_albedo;

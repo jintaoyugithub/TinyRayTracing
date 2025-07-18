@@ -2,7 +2,9 @@
 
 #include <image.hpp>
 #include <material.hpp>
+#include <pch.hpp>
 #include <scene.hpp>
+#include <utilities.hpp>
 
 class Viewport {
 public:
@@ -128,8 +130,8 @@ public:
         // Multisampling
         for (int idx = 0; idx < sampLevel; idx++) {
           // randomly generate some offset
-          double xOffset = randDoule(0.0, pixelSize.x / sampLevel) * idx;
-          double yOffset = randDoule(0.0, pixelSize.y / sampLevel) * idx;
+          double xOffset = randDouble(0.0, pixelSize.x / sampLevel) * idx;
+          double yOffset = randDouble(0.0, pixelSize.y / sampLevel) * idx;
           vec2 pixelOffset = vec2(xOffset, yOffset);
           Ray ray = genRay(pixelPos, pixelOffset);
 
